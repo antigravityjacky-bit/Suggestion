@@ -22,23 +22,15 @@ export function renderSummaryTable(container, races) {
   const BADGE_CLASSES = ['badge-1st', 'badge-2nd', 'badge-3rd', 'badge-4th'];
   const BADGE_LABELS  = ['1st', '2nd', '3rd', '4th'];
 
-  function allBadgesHTML() {
-    return `<div class="summary-badges">${
-      BADGE_CLASSES.map((cls, i) =>
-        `<span class="badge ${cls}">${BADGE_LABELS[i]}</span>`
-      ).join('')
-    }</div>`;
-  }
-
-  // Returns true if horse number h was clicked (has a badge) in this race
-  function wasClicked(race, h) {
-    if (h == null) return false;
+  // Returns click_count (0 = not clicked, 1–4 = specific badge) for horse h in this race
+  function getClickCount(race, h) {
+    if (h == null) return 0;
     const slots = buildSlots(race);             // [xm1,xm2,xm3,xm4,slot5,slot6]
     const slotIndex = slots.findIndex(v => v === h);
-    if (slotIndex === -1) return false;         // not in table at all
-    if (!race.click_states) return false;
+    if (slotIndex === -1) return 0;             // not in table at all
+    if (!race.click_states) return 0;
     const cs = race.click_states.find(c => c.slot_index === slotIndex);
-    return cs ? cs.click_count > 0 : false;
+    return cs ? cs.click_count : 0;
   }
 
   const section = document.createElement('div');
@@ -83,14 +75,23 @@ export function renderSummaryTable(container, races) {
       const td = document.createElement('td');
       td.className = 'summary-horse-cell';
 
-      const clicked = wasClicked(race, h);
+      const clickCount = getClickCount(race, h);
+      let badgeHTML = '';
+      if (h) {
+        if (clickCount > 0) {
+          // Show only the one badge that was actually assigned
+          const cls   = BADGE_CLASSES[clickCount - 1];
+          const label = BADGE_LABELS[clickCount - 1];
+          badgeHTML = `<div class="summary-badges"><span class="badge ${cls}">${label}</span></div>`;
+        } else {
+          badgeHTML = '<span class="badge-x">✕</span>';
+        }
+      }
 
       td.innerHTML = `
         <div class="summary-horse-inner">
           <span class="summary-horse-num">${h ?? '—'}</span>
-          ${h
-            ? (clicked ? allBadgesHTML() : '<span class="badge-x">✕</span>')
-            : ''}
+          ${badgeHTML}
         </div>
       `;
       tr.appendChild(td);
