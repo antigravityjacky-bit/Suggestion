@@ -1,6 +1,6 @@
 // Input Phase — renders the race data entry form
 
-import { createSession, saveRaces } from './api.js';
+import { createSession, saveRaces, getSession } from './api.js';
 
 export function renderInputPhase(container, onComplete) {
   container.innerHTML = '';
@@ -111,12 +111,12 @@ export function renderInputPhase(container, onComplete) {
     try {
       const today = new Date().toISOString().slice(0, 10);
       const { session_id } = await createSession(count, today);
-      const { race_ids } = await saveRaces(session_id, races);
+      await saveRaces(session_id, races);
 
-      // Attach db IDs to races array
-      races.forEach((r, idx) => { r.id = race_ids[idx]; });
-
-      onComplete({ id: session_id, race_count: count, label: today, races });
+      // Fetch back from storage so races are in the stored format
+      // ({xiaomei_1, xiaomei_2, ...}) that tableRenderer expects
+      const session = await getSession(session_id);
+      onComplete(session);
     } catch (err) {
       console.error(err);
       submitBtn.disabled = false;
@@ -176,9 +176,15 @@ function buildRaceForms(container, count) {
     const inputs = card.querySelectorAll('input');
     inputs.forEach((inp, idx) => {
       inp.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === 'Tab') {
-          if (e.key === 'Enter') e.preventDefault();
+        if (e.key === 'Enter') {
+          e.preventDefault();
           if (idx < inputs.length - 1) inputs[idx + 1].focus();
+        } else if (e.key === 'Tab' && idx < inputs.length - 1) {
+          // Prevent native Tab from also moving focus (would skip a field).
+          // On the last input of each card, let Tab fall through naturally
+          // so the browser moves to the next card's first input.
+          e.preventDefault();
+          inputs[idx + 1].focus();
         }
       });
     });
