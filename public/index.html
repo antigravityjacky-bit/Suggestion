@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>賽馬預測追蹤系統</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="logo">
+          <span class="logo-icon">&#9651;</span>
+          <span class="logo-text">RACING<span class="logo-accent">TRACK</span></span>
+        </div>
+        <div class="session-controls">
+          <select id="session-select" class="session-select">
+            <option value="">— 載入歷史記錄 —</option>
+          </select>
+          <button id="new-session-btn" class="btn btn-outline">新比賽日</button>
+        </div>
+      </div>
+    </header>
+
+    <main id="input-phase" class="phase">
+      <!-- Rendered by inputPhase.js -->
+    </main>
+
+    <main id="table-phase" class="phase hidden">
+      <!-- Rendered by tableRenderer.js -->
+    </main>
+
+    <section id="summary-phase" class="hidden">
+      <!-- Rendered by summaryTable.js -->
+    </section>
+
+    <div id="summary-bar" class="summary-bar hidden">
+      <button id="summary-btn" class="btn btn-accent">
+        <span class="btn-icon">&#9670;</span> 生成總結表
+      </button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
