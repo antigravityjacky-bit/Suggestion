@@ -488,6 +488,15 @@ table.race-table td {
 .badge-3rd { background: var(--badge-3rd-bg); color: var(--badge-3rd); border: 1px solid var(--badge-3rd); }
 .badge-4th { background: var(--badge-4th-bg); color: var(--badge-4th); border: 1px solid var(--badge-4th); }
 
+.badge-x {
+  display: inline-block;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  color: #ff3b3b;
+  filter: drop-shadow(0 0 6px rgba(255, 59, 59, 0.6));
+}
+
 /* Dividers between slot groups */
 .slot-divider {
   width: 1px;

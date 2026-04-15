@@ -1,4 +1,7 @@
 // Summary Table — generates the bottom summary section with all 4 badges
+// or a red ✕ if the horse number was never clicked in the main table.
+
+import { buildSlots } from './tableRenderer.js';
 
 export function renderSummaryTable(container, races) {
   container.innerHTML = '';
@@ -19,13 +22,23 @@ export function renderSummaryTable(container, races) {
   const BADGE_CLASSES = ['badge-1st', 'badge-2nd', 'badge-3rd', 'badge-4th'];
   const BADGE_LABELS  = ['1st', '2nd', '3rd', '4th'];
 
-  // Build all-badges HTML
   function allBadgesHTML() {
     return `<div class="summary-badges">${
       BADGE_CLASSES.map((cls, i) =>
         `<span class="badge ${cls}">${BADGE_LABELS[i]}</span>`
       ).join('')
     }</div>`;
+  }
+
+  // Returns true if horse number h was clicked (has a badge) in this race
+  function wasClicked(race, h) {
+    if (h == null) return false;
+    const slots = buildSlots(race);             // [xm1,xm2,xm3,xm4,slot5,slot6]
+    const slotIndex = slots.findIndex(v => v === h);
+    if (slotIndex === -1) return false;         // not in table at all
+    if (!race.click_states) return false;
+    const cs = race.click_states.find(c => c.slot_index === slotIndex);
+    return cs ? cs.click_count > 0 : false;
   }
 
   const section = document.createElement('div');
@@ -41,7 +54,6 @@ export function renderSummaryTable(container, races) {
   const table = document.createElement('table');
   table.className = 'summary-table';
 
-  // Build header: race col + 4 horse cols
   table.innerHTML = `
     <thead>
       <tr>
@@ -70,10 +82,15 @@ export function renderSummaryTable(container, races) {
     for (const h of horses) {
       const td = document.createElement('td');
       td.className = 'summary-horse-cell';
+
+      const clicked = wasClicked(race, h);
+
       td.innerHTML = `
         <div class="summary-horse-inner">
           <span class="summary-horse-num">${h ?? '—'}</span>
-          ${h ? allBadgesHTML() : ''}
+          ${h
+            ? (clicked ? allBadgesHTML() : '<span class="badge-x">✕</span>')
+            : ''}
         </div>
       `;
       tr.appendChild(td);
